@@ -362,3 +362,4 @@ Data Science Instructor
 
 GitHub: https://github.com/datasciencekibaatein
 
+LinkedIn: https://www.linkedin.com/in/dhruv6397/
