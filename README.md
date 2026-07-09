@@ -308,19 +308,14 @@ Potential enhancements include:
 
 ## Screenshots
 
-You can include screenshots of the application here.
 
 ### Home Page
 
-```
-assets/home-page.png
-```
+![Home Page](assets/home-page.png)
 
 ### Prediction Result
 
-```
-assets/prediction-result.png
-```
+![Prediction Result](assets/prediction-result.png)
 
 ---
 
