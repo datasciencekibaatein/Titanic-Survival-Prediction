@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titanic Survival Predictor</title>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body{
+            background:linear-gradient(135deg,#4facfe,#00c6fb,#43e97b);
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding:30px;
+        }
+
+        .container{
+            width:500px;
+            background:#fff;
+            border-radius:15px;
+            overflow:hidden;
+            box-shadow:0 10px 25px rgba(0,0,0,.25);
+        }
+
+        .header{
+            background:linear-gradient(90deg,#1e3c72,#2a5298);
+            color:white;
+            text-align:center;
+            padding:25px;
+        }
+
+        .header h1{
+            font-size:30px;
+            margin-bottom:8px;
+        }
+
+        .header p{
+            color:#d8e4ff;
+            font-size:15px;
+        }
+
+        .content{
+            padding:25px;
+        }
+
+        .form-group{
+            margin-bottom:15px;
+        }
+
+        label{
+            display:block;
+            margin-bottom:6px;
+            font-weight:600;
+            color:#333;
+        }
+
+        input,select{
+            width:100%;
+            padding:10px;
+            border:1px solid #ccc;
+            border-radius:8px;
+            font-size:15px;
+        }
+
+        input:focus,
+        select:focus{
+            outline:none;
+            border-color:#2a5298;
+            box-shadow:0 0 5px rgba(42,82,152,.3);
+        }
+
+        button{
+            width:100%;
+            padding:13px;
+            border:none;
+            border-radius:8px;
+            background:#2a5298;
+            color:white;
+            font-size:17px;
+            font-weight:bold;
+            cursor:pointer;
+            transition:.3s;
+        }
+
+        button:hover{
+            background:#1e3c72;
+        }
+
+        #result{
+            margin-top:20px;
+            padding:15px;
+            text-align:center;
+            border-radius:10px;
+            display:none;
+        }
+
+        .success{
+            background:#d4edda;
+            color:#155724;
+        }
+
+        .danger{
+            background:#f8d7da;
+            color:#721c24;
+        }
+
+        .confidence{
+            margin-top:8px;
+            font-size:16px;
+            font-weight:bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>🚢 Titanic Survival Predictor</h1>
+        <p>Machine Learning Classification using FastAPI</p>
+    </div>
+
+    <div class="content">
+
+        <form id="predictForm">
+
+            <div class="form-group">
+                <label>Passenger Class</label>
+                <select id="Pclass">
+                    <option value="1">First Class</option>
+                    <option value="2">Second Class</option>
+                    <option value="3" selected>Third Class</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Gender</label>
+                <select id="Sex">
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Age</label>
+                <input type="number" id="Age" step="0.1" required>
+            </div>
+
+            <div class="form-group">
+                <label>Siblings / Spouse (SibSp)</label>
+                <input type="number" id="SibSp" required>
+            </div>
+
+            <div class="form-group">
+                <label>Parents / Children (Parch)</label>
+                <input type="number" id="Parch" required>
+            </div>
+
+            <div class="form-group">
+                <label>Fare</label>
+                <input type="number" id="Fare" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+                <label>Embarked</label>
+                <select id="Embarked">
+                    <option value="S">Southampton (S)</option>
+                    <option value="C">Cherbourg (C)</option>
+                    <option value="Q">Queenstown (Q)</option>
+                </select>
+            </div>
+
+            <button type="submit">Predict Survival</button>
+
+        </form>
+
+        <div id="result"></div>
+
+    </div>
+
+</div>
+
+<script>
+
+document.getElementById("predictForm").addEventListener("submit", async function(event){
+
+    event.preventDefault();
+
+    const passenger = {
+        Pclass: parseInt(document.getElementById("Pclass").value),
+        Sex: document.getElementById("Sex").value,
+        Age: parseFloat(document.getElementById("Age").value),
+        SibSp: parseInt(document.getElementById("SibSp").value),
+        Parch: parseInt(document.getElementById("Parch").value),
+        Fare: parseFloat(document.getElementById("Fare").value),
+        Embarked: document.getElementById("Embarked").value
+    };
+
+    try{
+
+        const response = await fetch("/predict",{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify(passenger)
+        });
+
+        const data = await response.json();
+
+        const result = document.getElementById("result");
+
+        result.style.display = "block";
+
+        if(data.prediction === 1){
+
+            result.className = "success";
+
+            result.innerHTML = `
+                <h2>🎉 Passenger is likely to Survive</h2>
+                <div class="confidence">
+                    Confidence: ${(data.confidence*100).toFixed(2)}%
+                </div>
+            `;
+
+        }else{
+
+            result.className = "danger";
+
+            result.innerHTML = `
+                <h2>❌ Passenger is unlikely to Survive</h2>
+                <div class="confidence">
+                    Confidence: ${(data.confidence*100).toFixed(2)}%
+                </div>
+            `;
+
+        }
+
+    }
+    catch(error){
+
+        const result = document.getElementById("result");
+
+        result.style.display = "block";
+        result.className = "danger";
+
+        result.innerHTML = `
+            <h2>Error</h2>
+            <p>Unable to connect to the FastAPI server.</p>
+        `;
+
+        console.error(error);
+    }
+
+});
+
+</script>
+
+</body>
+</html>
